@@ -5,7 +5,7 @@ const mapCols = 25;
 const mapRows = 18;
 const canvasWidth = tileSize * mapCols;
 const canvasHeight = tileSize * mapRows;
-let TOTAL_GOLD_COUNT = 0;
+const TOTAL_GOLD_COUNT = 10; // Initial gold count
 
 type TileType = "dirt" | "empty" | "gold";
 
@@ -19,13 +19,12 @@ const createInitialMap = (): TileType[][] => {
 
     // Place random gold nuggets
     let placed = 0;
-    while (placed < 10) {
+    while (placed < TOTAL_GOLD_COUNT) {
         const row = Math.floor(Math.random() * mapRows);
         const col = Math.floor(Math.random() * mapCols);
         if (map[row][col] === "dirt") {
             map[row][col] = "gold";
             placed++;
-            TOTAL_GOLD_COUNT++;
         }
     }
 
@@ -84,7 +83,7 @@ export const ProspectorGame = () => {
                 return;
             }
             // Handle player movement
-            if (timestamp - lastMove > 120) {
+            if (timestamp - lastMove > 200) {
                 let { x, y } = playerRef.current;
 
                 if (keysPressed.current.has("ArrowUp")) y -= 1;
@@ -132,21 +131,23 @@ export const ProspectorGame = () => {
                 lastEnemySpawn = timestamp;
             }
 
-            // Move enemies every 400ms
-            if (timestamp - lastEnemyMove > 400) {
+            // Move enemies every 200ms
+            if (timestamp - lastEnemyMove > 200) {
                 enemiesRef.current = enemiesRef.current.map((enemy) => {
-                    const shuffled = [...directions].sort(() => Math.random() - 0.5);
-                    for (const dir of shuffled) {
-                        const nx = enemy.x + dir.x;
-                        const ny = enemy.y + dir.y;
-                        if (
-                            nx >= 0 &&
-                            ny >= 0 &&
-                            nx < mapCols &&
-                            ny < mapRows &&
-                            mapRef.current[ny][nx] === "empty"
-                        ) {
-                            return { x: nx, y: ny };
+                    for (let attempt = 0; attempt < 3; attempt++) {
+                        const shuffled = [...directions].sort(() => Math.random() - 0.5);
+                        for (const dir of shuffled) {
+                            const nx = enemy.x + dir.x;
+                            const ny = enemy.y + dir.y;
+                            if (
+                                nx >= 0 &&
+                                ny >= 0 &&
+                                nx < mapCols &&
+                                ny < mapRows &&
+                                mapRef.current[ny][nx] === "empty"
+                            ) {
+                                return { x: nx, y: ny };
+                            }
                         }
                     }
                     return enemy;
