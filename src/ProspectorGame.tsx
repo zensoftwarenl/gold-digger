@@ -44,10 +44,22 @@ export const ProspectorGame = () => {
     const keysPressed = useRef<Set<string>>(new Set());
     const playerRef = useRef<Position>({ x: 1, y: 1 });
     const enemiesRef = useRef<Position[]>([]);
+    const runningRef = useRef(true);
 
     const [score, setScore] = useState(0);
     const [gameOver, setGameOver] = useState(false);
     const [win, setWin] = useState(false);
+
+    const resetGame = () => {
+        const newMap = createInitialMap();
+        mapRef.current = newMap;
+        playerRef.current = { x: 1, y: 1 };
+        enemiesRef.current = [];
+        setScore(0);
+        setGameOver(false);
+        setWin(false);
+        runningRef.current = true;
+    };
 
     // Keyboard input
     useEffect(() => {
@@ -103,6 +115,7 @@ export const ProspectorGame = () => {
                             const newScore = prev + 1;
                             if (newScore === TOTAL_GOLD_COUNT) {
                                 setWin(true);
+                                runningRef.current = false;
                             }
                             return newScore;
                         });
@@ -162,6 +175,7 @@ export const ProspectorGame = () => {
                     enemy.y === playerRef.current.y
                 ) {
                     setGameOver(true);
+                    runningRef.current = false;
                 }
             }
 
@@ -194,9 +208,14 @@ export const ProspectorGame = () => {
             ctx.fillStyle = "yellow";
             ctx.fillRect(px, py, tileSize, tileSize);
 
-            requestAnimationFrame(loop);
+            if (runningRef.current) {
+                requestAnimationFrame(loop);
+            }
         };
 
+        // Start the loop only if not game over or win
+        // (This is technically redundant because at mount, gameOver and win should be false,
+        // but we keep the conditional for clarity if needed)
         requestAnimationFrame(loop);
     }, [gameOver]);
 
@@ -226,6 +245,13 @@ export const ProspectorGame = () => {
                     margin: "auto",
                 }}
             />
+            {(gameOver || win) && (
+                <div style={{ textAlign: "center", marginTop: "1rem" }}>
+                    <button onClick={resetGame} style={{ padding: "0.5rem 1rem" }}>
+                        Play Again
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
