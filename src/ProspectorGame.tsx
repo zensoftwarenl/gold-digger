@@ -47,6 +47,7 @@ export const ProspectorGame = () => {
     const playerRef = useRef<Position>({ x: 1, y: 1 });
     const enemiesRef = useRef<Position[]>([]);
     const runningRef = useRef(true);
+    const playerFrame = useRef(0);
 
     const [score, setScore] = useState(0);
     const [gameOver, setGameOver] = useState(false);
@@ -218,10 +219,13 @@ export const ProspectorGame = () => {
                 );
             }
 
+            // Animate player frame
+            playerFrame.current = (Math.floor(timestamp / 150) % 3);
+
             // Draw player
             const px = playerRef.current.x * tileSize;
             const py = playerRef.current.y * tileSize;
-            const playerSprite = { x: 0, y: 0 };
+            const playerSprite = { x: playerFrame.current * tileSize, y: 0 };
             ctx.drawImage(
                 imageRef.current,
                 playerSprite.x, playerSprite.y, tileSize, tileSize,
