@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import tilesetSrc from './Prospector-Tileset.png';
 
 const tileSize = 32;
 const mapCols = 25;
@@ -40,6 +41,7 @@ const directions: Position[] = [
 
 export const ProspectorGame = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const imageRef = useRef<HTMLImageElement | null>(null);
     const mapRef = useRef<TileType[][]>(createInitialMap());
     const keysPressed = useRef<Set<string>>(new Set());
     const playerRef = useRef<Position>({ x: 1, y: 1 });
@@ -181,42 +183,58 @@ export const ProspectorGame = () => {
 
             // Draw map
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            if (!imageRef.current) return;
+
+            const tileMap = {
+                dirt: { x: 0, y: 48 },
+                gold: { x: 96, y: 96 },
+                empty: { x: 48, y: 48 },
+            };
+
             for (let row = 0; row < mapRows; row++) {
                 for (let col = 0; col < mapCols; col++) {
                     const tile = mapRef.current[row][col];
-                    if (tile === "dirt") ctx.fillStyle = "#654321";
-                    else if (tile === "gold") ctx.fillStyle = "gold";
-                    else ctx.fillStyle = "#111";
-                    ctx.fillRect(col * tileSize, row * tileSize, tileSize, tileSize);
+                    const sprite = tileMap[tile];
+                    ctx.drawImage(
+                        imageRef.current,
+                        sprite.x, sprite.y, tileSize, tileSize,
+                        col * tileSize, row * tileSize, tileSize, tileSize
+                    );
                 }
             }
 
             // Draw enemies
+            const enemySprite = { x: 48, y: 96 };
             for (const enemy of enemiesRef.current) {
-                ctx.fillStyle = "red";
-                ctx.fillRect(
-                    enemy.x * tileSize + 4,
-                    enemy.y * tileSize + 4,
-                    tileSize - 8,
-                    tileSize - 8
+                ctx.drawImage(
+                    imageRef.current,
+                    enemySprite.x, enemySprite.y, tileSize, tileSize,
+                    enemy.x * tileSize, enemy.y * tileSize, tileSize, tileSize
                 );
             }
 
             // Draw player
             const px = playerRef.current.x * tileSize;
             const py = playerRef.current.y * tileSize;
-            ctx.fillStyle = "yellow";
-            ctx.fillRect(px, py, tileSize, tileSize);
+            const playerSprite = { x: 0, y: 0 };
+            ctx.drawImage(
+                imageRef.current,
+                playerSprite.x, playerSprite.y, tileSize, tileSize,
+                px, py, tileSize, tileSize
+            );
 
             if (runningRef.current) {
                 requestAnimationFrame(loop);
             }
         };
 
-        // Start the loop only if not game over or win
-        // (This is technically redundant because at mount, gameOver and win should be false,
-        // but we keep the conditional for clarity if needed)
-        requestAnimationFrame(loop);
+        const image = new Image();
+        image.src = tilesetSrc;
+        image.onload = () => {
+            imageRef.current = image;
+            requestAnimationFrame(loop);
+        };
     }, [gameOver]);
 
     return (
