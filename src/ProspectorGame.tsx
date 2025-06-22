@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import tilesetSrc from './Prospector-Tileset.png';
 
 const tileSize = 32;
-const mapCols = 25;
-const mapRows = 18;
+const mapCols = 12;
+const mapRows = 12;
 const canvasWidth = tileSize * mapCols;
 const canvasHeight = tileSize * mapRows;
 const TOTAL_GOLD_COUNT = 10; // Initial gold count
@@ -80,11 +80,15 @@ export const ProspectorGame = () => {
         const ctx = canvasRef.current?.getContext("2d");
         if (!ctx) return;
 
+        let didScale = false;
         let lastMove = 0;
         let lastEnemySpawn = 0;
         let lastEnemyMove = 0;
 
         const loop = (timestamp: number) => {
+            if (!didScale) {
+                didScale = true;
+            }
             if (gameOver || win) {
                 ctx.fillStyle = win ? "lime" : "red";
                 ctx.font = "48px sans-serif";
@@ -187,9 +191,9 @@ export const ProspectorGame = () => {
             if (!imageRef.current) return;
 
             const tileMap = {
-                dirt: { x: 0, y: 48 },
+                dirt: { x: 0, y: 96 },
                 gold: { x: 96, y: 96 },
-                empty: { x: 48, y: 48 },
+                empty: { x: 0, y: 32 },
             };
 
             for (let row = 0; row < mapRows; row++) {
@@ -205,7 +209,7 @@ export const ProspectorGame = () => {
             }
 
             // Draw enemies
-            const enemySprite = { x: 48, y: 96 };
+            const enemySprite = { x: 0, y: 64 };
             for (const enemy of enemiesRef.current) {
                 ctx.drawImage(
                     imageRef.current,
@@ -257,6 +261,9 @@ export const ProspectorGame = () => {
                 width={canvasWidth}
                 height={canvasHeight}
                 style={{
+                    width: canvasWidth * 1.8,
+                    height: canvasHeight * 1.8,
+                    imageRendering: 'pixelated',
                     border: "2px solid #444",
                     background: "#000",
                     display: "block",
