@@ -50,6 +50,7 @@ export const ProspectorGame = () => {
     const enemiesRef = useRef<Position[]>([]);
     const runningRef = useRef(true);
     const playerFrame = useRef(0);
+    const enemyFrame = useRef(0);
 
     const [score, setScore] = useState(0);
     const [gameOver, setGameOver] = useState(false);
@@ -212,8 +213,8 @@ export const ProspectorGame = () => {
             }
 
             // Draw enemies
-            const enemySprite = { x: 0, y: 64 };
             for (const enemy of enemiesRef.current) {
+                const enemySprite = { x: enemyFrame.current * tileSize, y: 64 };
                 ctx.drawImage(
                     imageRef.current,
                     enemySprite.x, enemySprite.y, tileSize, tileSize,
@@ -223,6 +224,9 @@ export const ProspectorGame = () => {
 
             // Animate player frame
             playerFrame.current = (Math.floor(timestamp / 150) % 3);
+
+            // Animate enemy frame
+            enemyFrame.current = (Math.floor(timestamp / 150) % 3);
 
             // Draw player
             const px = playerRef.current.x * tileSize;
