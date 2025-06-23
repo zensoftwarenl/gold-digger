@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import tilesetSrc from './Prospector-Tileset.png';
+import headerImageSrc from './Prospecter-main-screen.png';
 
 const tileSize = 32;
 const mapCols = 12;
@@ -41,6 +42,7 @@ const directions: Position[] = [
 
 export const ProspectorGame = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const headerCanvasRef = useRef<HTMLCanvasElement | null>(null);
     const imageRef = useRef<HTMLImageElement | null>(null);
     const mapRef = useRef<TileType[][]>(createInitialMap());
     const keysPressed = useRef<Set<string>>(new Set());
@@ -245,6 +247,18 @@ export const ProspectorGame = () => {
         };
     }, [gameOver]);
 
+    useEffect(() => {
+        const img = new Image();
+        img.src = headerImageSrc;
+        img.onload = () => {
+            const ctx = headerCanvasRef.current?.getContext("2d");
+            if (ctx) {
+                ctx.clearRect(0, 0, canvasWidth, 178);
+                ctx.drawImage(img, 0, 0, img.width, 178, 0, 0, canvasWidth, 178);
+            }
+        };
+    }, []);
+
     return (
         <div>
             <p style={{ color: "gold", fontSize: "1.2rem", textAlign: "center" }}>
@@ -260,20 +274,34 @@ export const ProspectorGame = () => {
                     You win! Refresh to play again.
                 </p>
             )}
-            <canvas
-                ref={canvasRef}
-                width={canvasWidth}
-                height={canvasHeight}
-                style={{
-                    width: canvasWidth * 1.8,
-                    height: canvasHeight * 1.8,
-                    imageRendering: 'pixelated',
-                    border: "2px solid #444",
-                    background: "#000",
-                    display: "block",
-                    margin: "auto",
-                }}
-            />
+            <>
+                <canvas
+                    ref={headerCanvasRef}
+                    width={canvasWidth}
+                    height={178}
+                    style={{
+                        width: canvasWidth * 1.2,
+                        height: 178 * 1.2,
+                        imageRendering: 'pixelated',
+                        display: "block",
+                        margin: "auto",
+                    }}
+                />
+                <canvas
+                    ref={canvasRef}
+                    width={canvasWidth}
+                    height={canvasHeight}
+                    style={{
+                        width: canvasWidth * 1.2,
+                        height: canvasHeight * 1.2,
+                        imageRendering: 'pixelated',
+                        border: "2px solid #444",
+                        background: "#000",
+                        display: "block",
+                        margin: "auto",
+                    }}
+                />
+            </>
             {(gameOver || win) && (
                 <div style={{ textAlign: "center", marginTop: "1rem" }}>
                     <button onClick={resetGame} style={{ padding: "0.5rem 1rem" }}>
