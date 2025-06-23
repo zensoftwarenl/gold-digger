@@ -34,7 +34,7 @@ This will start the Vite development server. Open your browser to:
 ```
 http://localhost:5173/
 ```
-
+![Gold-Digger-In-Action.png](public/Gold-Digger-In-Action.png)
 ### 🔨 Build for production
 
 ```bash
