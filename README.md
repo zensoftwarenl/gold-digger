@@ -1,4 +1,4 @@
-![Prospecter-main-screen.png](src/Prospecter-main-screen.png)
+![GoldDiggerTitleScreen.png](public/GoldDiggerTitleScreen.png)
 # Gold Digger 🎮
 
 Gold Digger is a retro-style casual mining game inspired by the classic *Digger*. Built with React, TypeScript, and Canvas, it features pixel-art animations, tile-based movement, enemies, collectibles, and a decorative banner.
