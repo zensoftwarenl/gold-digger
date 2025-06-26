@@ -79,7 +79,6 @@ export const ProspectorGame = () => {
         };
     }, []);
 
-    // Game loop
     useEffect(() => {
         const ctx = canvasRef.current?.getContext("2d");
         if (!ctx) return;
@@ -89,22 +88,7 @@ export const ProspectorGame = () => {
         let lastEnemySpawn = 0;
         let lastEnemyMove = 0;
 
-        const loop = (timestamp: number) => {
-            if (!didScale) {
-                didScale = true;
-            }
-            if (gameOver || win) {
-                ctx.fillStyle = win ? "lime" : "red";
-                ctx.font = "48px sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText(
-                    win ? "YOU WIN!" : "GAME OVER",
-                    canvasWidth / 2,
-                    canvasHeight / 2
-                );
-                return;
-            }
-            // Handle player movement
+        const handlePlayerMovement = (timestamp: number) => {
             if (timestamp - lastMove > 200) {
                 let { x, y } = playerRef.current;
 
@@ -136,8 +120,9 @@ export const ProspectorGame = () => {
                     lastMove = timestamp;
                 }
             }
+        };
 
-            // Spawn enemies every 4 seconds
+        const handleEnemySpawning = (timestamp: number) => {
             if (timestamp - lastEnemySpawn > 4000 && enemiesRef.current.length < 5) {
                 const empties: Position[] = [];
                 for (let y = 0; y < mapRows; y++) {
@@ -153,8 +138,9 @@ export const ProspectorGame = () => {
                 }
                 lastEnemySpawn = timestamp;
             }
+        };
 
-            // Move enemies every 200ms
+        const handleEnemyMovement = (timestamp: number) => {
             if (timestamp - lastEnemyMove > 200) {
                 enemiesRef.current = enemiesRef.current.map((enemy) => {
                     for (let attempt = 0; attempt < 3; attempt++) {
@@ -177,8 +163,9 @@ export const ProspectorGame = () => {
                 });
                 lastEnemyMove = timestamp;
             }
+        };
 
-            // Check collision with enemies
+        const checkEnemyCollision = () => {
             for (const enemy of enemiesRef.current) {
                 if (
                     enemy.x === playerRef.current.x &&
@@ -188,8 +175,9 @@ export const ProspectorGame = () => {
                     runningRef.current = false;
                 }
             }
+        };
 
-            // Draw map
+        const drawMap = (ctx: CanvasRenderingContext2D) => {
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
             if (!imageRef.current) return;
@@ -211,8 +199,11 @@ export const ProspectorGame = () => {
                     );
                 }
             }
+        };
 
-            // Draw enemies
+        const drawEnemies = (ctx: CanvasRenderingContext2D) => {
+            if (!imageRef.current) return;
+
             for (const enemy of enemiesRef.current) {
                 const enemySprite = { x: enemyFrame.current * tileSize, y: 64 };
                 ctx.drawImage(
@@ -221,6 +212,10 @@ export const ProspectorGame = () => {
                     enemy.x * tileSize, enemy.y * tileSize, tileSize, tileSize
                 );
             }
+        };
+
+        const drawPlayer = (ctx: CanvasRenderingContext2D, timestamp: number) => {
+            if (!imageRef.current) return;
 
             // Animate player frame
             playerFrame.current = (Math.floor(timestamp / 150) % 3);
@@ -237,6 +232,32 @@ export const ProspectorGame = () => {
                 playerSprite.x, playerSprite.y, tileSize, tileSize,
                 px, py, tileSize, tileSize
             );
+        };
+
+        const loop = (timestamp: number) => {
+            if (!didScale) {
+                didScale = true;
+            }
+            if (gameOver || win) {
+                ctx.fillStyle = win ? "lime" : "red";
+                ctx.font = "48px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(
+                    win ? "YOU WIN!" : "GAME OVER",
+                    canvasWidth / 2,
+                    canvasHeight / 2
+                );
+                return;
+            }
+
+            handlePlayerMovement(timestamp);
+            handleEnemySpawning(timestamp);
+            handleEnemyMovement(timestamp);
+            checkEnemyCollision();
+
+            drawMap(ctx);
+            drawEnemies(ctx);
+            drawPlayer(ctx, timestamp);
 
             if (runningRef.current) {
                 requestAnimationFrame(loop);
